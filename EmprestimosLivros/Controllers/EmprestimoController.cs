@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using EmprestimosLivros.Data;
 using EmprestimosLivros.Models;
+using EmprestimosLivros.Services.SessaoService;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 
@@ -9,14 +10,22 @@ namespace EmprestimosLivros.Controllers
     public class EmprestimoController : Controller
     {
         private readonly ApplicationDbContext _db;
+        private readonly ISessaoInterface _sessaoInterface;
 
-        public EmprestimoController(ApplicationDbContext db)
+        public EmprestimoController(ApplicationDbContext db, ISessaoInterface sessaoInterface)
         {
             _db = db;
+            _sessaoInterface = sessaoInterface;
         }
 
         public IActionResult Index()
         {
+            var usuario = _sessaoInterface.BuscarSessao();
+            if(usuario == null)
+            {
+                return RedirectToAction("Login", "login");
+            }
+
             IEnumerable<EmprestimosModel> emprestimos = _db.Emprestimos;
             return View(emprestimos);
         }
@@ -24,6 +33,12 @@ namespace EmprestimosLivros.Controllers
         [HttpGet]
         public IActionResult Cadastrar()
         {
+            var usuario = _sessaoInterface.BuscarSessao();
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "login");
+            }
+
             return View();
         }
 
@@ -48,7 +63,13 @@ namespace EmprestimosLivros.Controllers
         [HttpGet]
         public IActionResult Editar(int? id)
         {
-            if(id == null || id==0)
+            var usuario = _sessaoInterface.BuscarSessao();
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "login");
+            }
+
+            if (id == null || id==0)
             {
                 return NotFound();
             }
@@ -89,6 +110,12 @@ namespace EmprestimosLivros.Controllers
         [HttpGet]
         public IActionResult Excluir(int? id)
         {
+            var usuario = _sessaoInterface.BuscarSessao();
+            if (usuario == null)
+            {
+                return RedirectToAction("Login", "login");
+            }
+
             if (id == null || id == 0)
             {
                 return NotFound();

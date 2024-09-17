@@ -1,5 +1,6 @@
 ﻿using EmprestimosLivros.Dto;
 using EmprestimosLivros.Services.LoginService;
+using EmprestimosLivros.Services.SessaoService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmprestimosLivros.Controllers
@@ -7,13 +8,27 @@ namespace EmprestimosLivros.Controllers
     public class LoginController : Controller
     {
         private readonly ILoginInterface _loginInterface;
-        public LoginController(ILoginInterface loginInterface)
+        private readonly ISessaoInterface _sessaoInterface;
+        public LoginController(ILoginInterface loginInterface, ISessaoInterface sessaoInterface)
         {
             _loginInterface = loginInterface;
+            _sessaoInterface = sessaoInterface;
         }
-        public IActionResult Index()
+        public IActionResult Login()
         {
+            var usuario = _sessaoInterface.BuscarSessao();
+            if (usuario != null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
             return View();
+        }
+
+        public IActionResult Logout()
+        {
+            _sessaoInterface.RemoveSessao();
+            return RedirectToAction("Login");
         }
 
         public IActionResult Registrar()
@@ -42,6 +57,32 @@ namespace EmprestimosLivros.Controllers
             else
             {
                 return View(usuarioRegisterDto);
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Login(UsuarioLoginDto usuarioLoginDto)
+        {
+            if(ModelState.IsValid)
+            {
+
+                var usuario = await _loginInterface.Login(usuarioLoginDto);
+
+                if(usuario.Status)
+                {
+                    TempData["MensagemSucesso"] = usuario.Mensagem;
+                    return RedirectToAction("index", "Home");
+                }
+                else
+                {
+                    TempData["MensagemErro"] = usuario.Mensagem;
+                    return View("Login", usuarioLoginDto);
+                }
+
+            }
+            else
+            {
+                return View(usuarioLoginDto);
             }
         }
     }

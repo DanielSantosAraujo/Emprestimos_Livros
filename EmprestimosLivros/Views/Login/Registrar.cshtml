@@ -1,6 +1,10 @@
 ﻿@using EmprestimosLivros.Dto
 @model UsuarioRegisterDto
 
+@{
+    Layout = "_LayoutDeslogada";
+}
+
 @if (TempData["MensagemSucesso"] != null)
 {
     <div class="alert alert-success text-light" role="alert">
@@ -49,7 +53,7 @@
 
         <div class="d-flex justify-content-center">
             <button type="submit" class="btn btn-success w-25 mx-2">Cadastrar</button>
-            <a asp-action="Index" asp-controller="Login" class="btn btn-secondary w-25">Voltar</a>
+            <a asp-action="Login" asp-controller="Login" class="btn btn-secondary w-25">Voltar</a>
         </div>
     </form>
 </div>
